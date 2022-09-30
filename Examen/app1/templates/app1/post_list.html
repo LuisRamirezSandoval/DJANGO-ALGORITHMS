@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +8,8 @@
     <title>APP 1</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
-</head>
+    <link rel="stylesheet" href="/Examen/app1/static/css/app1.css">
+  </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
@@ -49,23 +51,35 @@
                 <th scope="col">num2</th>
                 <th scope="col">num3</th>
                 <th scope="col">num4</th>
-                <th scope="col">suma</th>
+                
               </tr>
         </thead>
         <tbody>
+             
               {%for dato in datos%}
-              <tr>
+              <tr id="tabla1">
   
                 <td>{{dato.num1}}</td>
                 <td>{{dato.num2}}</td>
                 <td>{{dato.num3}}</td>
                 <td>{{dato.num4}}</td>
-                <td>{{suma}}</td>
+                
               </tr>
               {% endfor %}
         </tbody>
     </table>
-
+    <table class="table table-dark table-striped">
+      <thead>
+          <th scope="col">Resultados</th>
+      </thead>
+      <tbody>
+        {%for val in suma%}
+          <tr id="tabla2">
+            <td>{{val}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
