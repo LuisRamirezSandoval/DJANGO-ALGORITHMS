@@ -14,3 +14,7 @@ def post_list(request):
     cont['suma']=suma
     # print(cont)
     return render(request, 'app1/post_list.html', cont)
+
+def hola_mundo(request):
+    cont = {'mensaje':['hola mundo']}
+    return render(request, 'app1/hola_mundo.html', cont)
