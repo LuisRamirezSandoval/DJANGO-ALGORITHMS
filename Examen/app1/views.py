@@ -3,6 +3,9 @@ from .models import Post
 
 # Create your views here.
 
+def index(request):
+    return render(request, 'app1/index.html', {})
+
 def post_list(request):
     consulta = Post.objects.all()
     cont = {'datos':consulta}
