@@ -4,7 +4,7 @@ from .models import Post
 # Create your views here.
 
 def index(request):
-    return render(request, 'app1/index.html', {})
+    return render(request, 'app1/index.html', cont={})
 
 def post_list(request):
     consulta = Post.objects.all()
