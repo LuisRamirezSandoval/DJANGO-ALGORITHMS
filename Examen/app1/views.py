@@ -21,6 +21,7 @@ def post_list(request):
 def algoritmo_knn(request):
     if request.method == 'GET':
         print('enviando datos')
+        return render(request, 'app1/knn.html', {})
     else:
         x = int(request.POST['x'])
         y = int(request.POST['y'])
@@ -28,13 +29,14 @@ def algoritmo_knn(request):
         db = Post.objects.all()
         print('obteniendo datos.....')
         print(x,y,z)
-        distancia =[]
+        distancia = []
         for i in range(len(db)):
             val = math.sqrt(((x-db[i].num1)**2)+((y-db[i].num3)**2)+((z-db[i].num4)**2))
             #print(val)
             distancia.append((db[i].num2, val))
-        print(distancia)
-    return render(request, 'app1/knn.html', { 'dist': distancia})
+        #print(distancia)
+        cont = { 'dist': distancia}
+    return render(request, 'app1/knn.html', cont)
 
 def hola_mundo(request):
     cont = {'mensaje':['hola mundo']}
