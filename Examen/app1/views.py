@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Post
-
+import math
 # Create your views here.
 
 def index(request):
@@ -17,6 +17,24 @@ def post_list(request):
     cont['suma']=suma
     # print(cont)
     return render(request, 'app1/post_list.html', cont)
+
+def algoritmo_knn(request):
+    if request.method == 'GET':
+        print('enviando datos')
+    else:
+        x = int(request.POST['x'])
+        y = int(request.POST['y'])
+        z = int(request.POST['z'])
+        db = Post.objects.all()
+        print('obteniendo datos.....')
+        print(x,y,z)
+        distancia =[]
+        for i in range(len(db)):
+            val = math.sqrt(((x-db[i].num1)**2)+((y-db[i].num3)**2)+((z-db[i].num4)**2))
+            #print(val)
+            distancia.append((db[i].num2, val))
+        print(distancia)
+    return render(request, 'app1/knn.html', { 'dist': distancia})
 
 def hola_mundo(request):
     cont = {'mensaje':['hola mundo']}

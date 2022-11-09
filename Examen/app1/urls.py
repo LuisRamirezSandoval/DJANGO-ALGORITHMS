@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path(r'', views.index, name='index'),
     path('post_list/', views.post_list, name='post_list'),
+    path('algoritmo_knn/', views.algoritmo_knn, name='algoritmo_knn'),
 ]
