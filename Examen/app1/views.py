@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import Post
 import math
+from numpy import mean, var
 # Create your views here.
 
 def index(request):
@@ -26,9 +27,10 @@ def algoritmo_knn(request):
         x = int(request.POST['x'])
         y = int(request.POST['y'])
         z = int(request.POST['z'])
+        k = int(request.POST['k'])
         db = Post.objects.all()
         print('obteniendo datos.....')
-        print(x,y,z)
+        print(k,x,y,z)
         distancia = []
         for i in range(len(db)):
             val = math.sqrt(((x-db[i].num1)**2)+((y-db[i].num3)**2)+((z-db[i].num4)**2))
@@ -36,8 +38,65 @@ def algoritmo_knn(request):
             distancia.append((db[i].num2, val))
         #print(distancia)
         cont = { 'dist': distancia}
+        #calculando distancia
+        listK= distancia[:k]
+        knn ={}
+        letras=[]
+        for i in listK:
+            if i[0] in letras:
+                knn[i[0]]+=1
+            else:
+                letras.append(i[0])
+                knn[i[0]]=1
+        cont['knn']=knn
     return render(request, 'app1/knn.html', cont)
 
-def hola_mundo(request):
+def algoritmo_cbi(request):
+    bd = list(Post.objects.all())
+    new_bd = Post.objects.values('num2','num1','num3','num4').order_by('num2')
+    letra=[]
+    bd_final={}
+    for i in range(len(new_bd)):
+        # si la letra no esta en el arreglo que haga esto, si no ignorar
+        if bd[i].num2 in letra:
+            letra.append(bd[i].num2)
+        else:
+            valor = Post.objects.filter(num2=bd[i].num2)
+            letra.append(bd[i].num2)
+            suma_num1=[]
+            suma_num3=[]
+            suma_num4=[]
+            for j in list(valor):
+                suma_num1.append(j.num1)
+                suma_num3.append(j.num3)
+                suma_num4.append(j.num4)
+            media_num1=mean(suma_num1)
+            varianza_num1=var(suma_num1)
+            media_num3=mean(suma_num3)
+            varianza_num3=var(suma_num3)
+            media_num4=mean(suma_num4)
+            varianza_num4=var(suma_num4)
+            bd_final[bd[i].num2]=(media_num1,varianza_num1,media_num3,varianza_num3,media_num4,varianza_num4)
+            print('suma 1: ', suma_num1)
+            #print(letra)
+    print(len(bd_final))
+    #print(bd_final)
+    para_evidencia = {}
+    if request.method == 'POST':
+        x = int(request.POST['x'])
+        y = int(request.POST['y'])
+        z = int(request.POST['z'])
+        p_letra = 1/len(bd_final)
+        for l in range(len(bd_final)):
+            para_evidencia[bd_final[l]]= pre_posteriori(bd_final[l][0],bd_final[l][2],bd_final[l][4],bd_final[l][1],bd_final[l][3],bd_final[l[5]],x,y,z)
+
+    print(para_evidencia)
     cont = {'mensaje':['hola mundo']}
-    return render(request, 'app1/hola_mundo.html', cont)
+    return render(request, 'app1/algoritmo_cbi.html', cont)
+
+def pre_posteriori(media1,media3,media4,var1,var2,var3,x,y,z):
+    p_num1 = (1/math.sqrt(2*math.pi*var1))*math.exp((-(x-media1)**2)/2*var1)
+    p_num3 = (1/math.sqrt(2*math.pi*var2))*math.exp((-(y-media3)**2)/2*var2)
+    p_num4 = (1/math.sqrt(2*math.pi*var3))*math.exp((-(z-media4)**2)/2*var3)
+
+    return (p_num1,p_num3,p_num4)
