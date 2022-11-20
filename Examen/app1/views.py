@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .models import Post
 import math
 from numpy import mean, var
+import numpy as np
 # Create your views here.
 
 def index(request):
@@ -56,10 +57,12 @@ def algoritmo_cbi(request):
     new_bd = Post.objects.values('num2','num1','num3','num4').order_by('num2')
     letra=[]
     bd_final={}
+    probabilidad=""
     for i in range(len(new_bd)):
         # si la letra no esta en el arreglo que haga esto, si no ignorar
         if bd[i].num2 in letra:
-            letra.append(bd[i].num2)
+            print('ignorar letra')
+            #letra.append(bd[i].num2)
         else:
             valor = Post.objects.filter(num2=bd[i].num2)
             letra.append(bd[i].num2)
@@ -71,15 +74,15 @@ def algoritmo_cbi(request):
                 suma_num3.append(j.num3)
                 suma_num4.append(j.num4)
             media_num1=mean(suma_num1)
-            varianza_num1=var(suma_num1)
+            varianza_num1= calcular_varianza(suma_num3,is_sample= False)
             media_num3=mean(suma_num3)
             varianza_num3=var(suma_num3)
             media_num4=mean(suma_num4)
             varianza_num4=var(suma_num4)
             bd_final[bd[i].num2]=(media_num1,varianza_num1,media_num3,varianza_num3,media_num4,varianza_num4)
-            print('suma 1: ', suma_num1)
-            #print(letra)
-    print(len(bd_final))
+            #print('suma 1: ', suma_num1)
+    #print(len(letra))
+    #print(bd_final)
     #print(bd_final)
     para_evidencia = {}
     if request.method == 'POST':
@@ -88,15 +91,53 @@ def algoritmo_cbi(request):
         z = int(request.POST['z'])
         p_letra = 1/len(bd_final)
         for l in range(len(bd_final)):
-            para_evidencia[bd_final[l]]= pre_posteriori(bd_final[l][0],bd_final[l][2],bd_final[l][4],bd_final[l][1],bd_final[l][3],bd_final[l[5]],x,y,z)
+            #print(bd_final[letra[l]])
+            para_evidencia[letra[l]]= pre_posteriori(bd_final[letra[l]][0],bd_final[letra[l]][2],bd_final[letra[l]][4],bd_final[letra[l]][1],bd_final[letra[l]][3],bd_final[letra[l]][5],x,y,z)
 
-    print(para_evidencia)
-    cont = {'mensaje':['hola mundo']}
+        evidcia = evidencia(para_evidencia,letra,p_letra)
+        probabilidad = post_posteriori(para_evidencia,evidcia,letra)
+    #print(para_evidencia)
+    #print(evidcia)
+    #print(probabilidad)
+    cont = {'letra': probabilidad}
     return render(request, 'app1/algoritmo_cbi.html', cont)
 
 def pre_posteriori(media1,media3,media4,var1,var2,var3,x,y,z):
-    p_num1 = (1/math.sqrt(2*math.pi*var1))*math.exp((-(x-media1)**2)/2*var1)
-    p_num3 = (1/math.sqrt(2*math.pi*var2))*math.exp((-(y-media3)**2)/2*var2)
-    p_num4 = (1/math.sqrt(2*math.pi*var3))*math.exp((-(z-media4)**2)/2*var3)
+    p_num1 = (1/math.sqrt(2*math.pi*var1))* math.e*(pow(x-media1,2)/(2*var1))
+    p_num3 = (1/math.sqrt(2*math.pi*var2))* math.e*(pow(y-media3,2)/(2*var2))
+    p_num4 = (1/math.sqrt(2*math.pi*var3))* math.e*(pow(z-media4,2)/(2*var3))
 
     return (p_num1,p_num3,p_num4)
+
+def post_posteriori(para_evidencia, evidencia,letras):
+    rel = {}
+    valores_rel =[]
+    letra=""
+    for i in range(len(para_evidencia)):
+        val = (para_evidencia[letras[i]][0]*para_evidencia[letras[i]][1]*para_evidencia[letras[i]][2]) / evidencia
+        rel[letras[i]]= val
+        valores_rel.append(val)
+    maximo = max(valores_rel) 
+    keys = list(rel.keys())  
+    for j in range(len(rel)):
+        if rel[letras[j]] == maximo:
+            letra = keys[j]
+    return letra
+def evidencia(para_evidencia,letras,p_letra):
+    rel=[]
+    for i in range(len(para_evidencia)):
+        rel.append(p_letra*para_evidencia[letras[i]][0]*para_evidencia[letras[i]][1]*para_evidencia[letras[i]][2])
+    resultado = sum(rel)
+    return resultado
+
+def calcular_varianza(arr, is_sample=False):
+    media = (sum(arr) / len(arr))
+    diff = [(v - media) for v in arr]
+    sqr_diff = [d**2 for d in diff]
+    sum__sqr_diff = sum(sqr_diff)
+
+    if is_sample == True:
+        variance = sum__sqr_diff/(len(arr)-1)
+    else:
+        variance = sum__sqr_diff/(len(arr)-1)
+    return variance
