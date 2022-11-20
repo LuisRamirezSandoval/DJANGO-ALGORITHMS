@@ -61,7 +61,8 @@ def algoritmo_cbi(request):
     for i in range(len(new_bd)):
         # si la letra no esta en el arreglo que haga esto, si no ignorar
         if bd[i].num2 in letra:
-            print('ignorar letra')
+            cont+=1
+            #print('ignorar letra')
             #letra.append(bd[i].num2)
         else:
             valor = Post.objects.filter(num2=bd[i].num2)
