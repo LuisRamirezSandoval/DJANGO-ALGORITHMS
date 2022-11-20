@@ -96,10 +96,12 @@ def algoritmo_cbi(request):
 
         evidcia = evidencia(para_evidencia,letra,p_letra)
         probabilidad = post_posteriori(para_evidencia,evidcia,letra)
+        cont = {'letra': probabilidad}
+    else:
+        return render(request, 'app1/algoritmo_cbi.html', {})
     #print(para_evidencia)
     #print(evidcia)
     #print(probabilidad)
-    cont = {'letra': probabilidad}
     return render(request, 'app1/algoritmo_cbi.html', cont)
 
 def pre_posteriori(media1,media3,media4,var1,var2,var3,x,y,z):
