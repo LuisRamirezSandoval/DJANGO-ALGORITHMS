@@ -58,6 +58,7 @@ def algoritmo_cbi(request):
     letra=[]
     bd_final={}
     probabilidad=""
+    cont=0
     for i in range(len(new_bd)):
         # si la letra no esta en el arreglo que haga esto, si no ignorar
         if bd[i].num2 in letra:
