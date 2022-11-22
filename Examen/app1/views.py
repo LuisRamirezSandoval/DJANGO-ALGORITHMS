@@ -3,6 +3,7 @@ from .models import Post
 import math
 from numpy import mean, var
 import numpy as np
+import random
 # Create your views here.
 
 def index(request):
@@ -76,13 +77,13 @@ def algoritmo_cbi(request):
                 suma_num3.append(j.num3)
                 suma_num4.append(j.num4)
             media_num1=mean(suma_num1)
-            varianza_num1= calcular_varianza(suma_num3,is_sample= False)
+            varianza_num1= var(suma_num3)
             media_num3=mean(suma_num3)
             varianza_num3=var(suma_num3)
             media_num4=mean(suma_num4)
             varianza_num4=var(suma_num4)
             bd_final[bd[i].num2]=(media_num1,varianza_num1,media_num3,varianza_num3,media_num4,varianza_num4)
-            #print('suma 1: ', suma_num1)
+            #print('suma 1: ', valor)
     #print(len(letra))
     #print(bd_final)
     #print(bd_final)
@@ -103,7 +104,7 @@ def algoritmo_cbi(request):
         return render(request, 'app1/algoritmo_cbi.html', {})
     #print(para_evidencia)
     #print(evidcia)
-    #print(probabilidad)
+    #print(letra)
     return render(request, 'app1/algoritmo_cbi.html', cont)
 
 def pre_posteriori(media1,media3,media4,var1,var2,var3,x,y,z):
@@ -121,11 +122,12 @@ def post_posteriori(para_evidencia, evidencia,letras):
         val = (para_evidencia[letras[i]][0]*para_evidencia[letras[i]][1]*para_evidencia[letras[i]][2]) / evidencia
         rel[letras[i]]= val
         valores_rel.append(val)
+    print(rel)
     maximo = max(valores_rel) 
     keys = list(rel.keys())  
     for j in range(len(rel)):
         if rel[letras[j]] == maximo:
-            letra = keys[j]
+            letra = letras[j]
     return letra
 def evidencia(para_evidencia,letras,p_letra):
     rel=[]
@@ -134,14 +136,81 @@ def evidencia(para_evidencia,letras,p_letra):
     resultado = sum(rel)
     return resultado
 
-def calcular_varianza(arr, is_sample=False):
-    media = (sum(arr) / len(arr))
-    diff = [(v - media) for v in arr]
-    sqr_diff = [d**2 for d in diff]
-    sum__sqr_diff = sum(sqr_diff)
+def algoritmo_regresion(request):
+    bd = list(Post.objects.all())
+    """usando solo registros de la letra k"""
+    b = Post.objects.filter(num2=bd[0].num2)
+    """guradando la columna 1 y 3 los registros de k"""
+    col1=[]
+    col2=[]
+    for i in list(b):
+        col1.append(i.num1)
+        col2.append(i.num3)
+    """calculando b1 y b2"""
+    (b1,b2) = cal_regreison(col1,col2)
 
-    if is_sample == True:
-        variance = sum__sqr_diff/(len(arr)-1)
+    if request.method == 'POST':
+        x1 = int(request.POST["x"])
+        x2 = int(request.POST["y"])
+        datos = Post.objects.all()
+        b = calcConstante(datos)
+        resultado  = valorReferente(datos, x1, x2, b)
+        return render(request, 'app1/algoritmo_regresion.html', {'rel': resultado})
     else:
-        variance = sum__sqr_diff/(len(arr)-1)
-    return variance
+        return render(request, 'app1/algoritmo_regresion.html', {})
+
+def valorReferente(datos, x1, x2, b):
+    a1 = 0
+    a2 = 0
+    caracter = ''
+    resp=[]
+    for i in list(datos):
+        a1 = i.num1
+        caracter = i.num2
+        a2 = i.num3
+        
+        salida = 1/(1 + np.exp(-(a1*x1 + a2*x2 + b)))
+        if salida > 0.5:
+            #respuesta = caracter
+            resp.append(caracter)
+        else:
+            respuesta = f'No hay resultado que haya podido encontrar: {caracter}'
+    respuesta = random.choice(resp)
+    return respuesta
+
+def calcConstante(datos):
+    x = []
+    y = []
+    xCuadrada = 0
+    xy = 0
+    for i in list(datos):
+        xCuadrada = xCuadrada + i.num1**2
+        xy = xy + i.num1 * i.num3
+        x.append(i.num1)
+        y.append(i.num3)
+    xSum = sum(x)
+    ySum = sum(y)
+    constante = (xCuadrada*ySum - xy*xSum)/(datos.count()*xCuadrada-xSum**2)
+    return constante    
+
+def cal_regreison(col1,col2):
+    val1=0
+    val3=0
+    for i in range(len(col1)):
+        rel = col1[i]*col2[i]
+        val1+=rel
+
+        pos = col1[i]**2
+        val3+=pos
+
+    val2 = len(col1)*mean(col1)*mean(col2)
+    
+    val4 = 1/len(col1)*(sum(col1)**2)
+
+    b1 = (val1 - val2) / (val3 - val4)
+
+    #b2 = (val3 * sum(col2)) - (val1 * sum(col1)) / ((len(col1) * val3) - (sum(col1)**2))
+
+    b2 = mean(col2) - (b1*mean(col1))
+    
+    return b1,b2
