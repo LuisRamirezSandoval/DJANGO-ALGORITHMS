@@ -152,9 +152,9 @@ def algoritmo_regresion(request):
     if request.method == 'POST':
         x1 = int(request.POST["x"])
         x2 = int(request.POST["y"])
-        datos = Post.objects.all()
-        b = calcConstante(datos)
-        resultado  = valorReferente(datos, x1, x2, b)
+        bd = Post.objects.all()
+        b = cal_Constante(bd)
+        resultado  = valorReferente(bd, x1, x2, b)
         return render(request, 'app1/algoritmo_regresion.html', {'rel': resultado})
     else:
         return render(request, 'app1/algoritmo_regresion.html', {})
@@ -178,7 +178,7 @@ def valorReferente(datos, x1, x2, b):
     respuesta = random.choice(resp)
     return respuesta
 
-def calcConstante(datos):
+def cal_Constante(datos):
     x = []
     y = []
     xCuadrada = 0
